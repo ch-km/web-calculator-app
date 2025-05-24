@@ -1,8 +1,15 @@
 # backend/app.py
-from flask import Flask
+from flask import Flask, jsonify # jsonify をインポート
 
 # Flaskアプリケーションのインスタンスを作成
 app = Flask(__name__)
+
+
+@app.route('/ping', methods=['GET'])
+def ping_pong():
+    # jsonify を使ってPythonの辞書をJSONレスポンスに変換
+    return jsonify(message="pong!")
+
 
 # メインの実行ブロック
 if __name__ == '__main__':

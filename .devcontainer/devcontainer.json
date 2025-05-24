@@ -2,15 +2,27 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/python
 {
 	"name": "Python 3",
+
+	// 1. Dockerイメージの直接指定をやめ、Docker Composeファイルを参照するように変更
+	"dockerComposeFile": "../docker-compose.yml", // プロジェクトのルートにあるdocker-compose.ymlを指定
+
+	// 2. docker-compose.yml の中で、VS Codeが接続する「作業部屋」のサービス名を指定	
+	"service": "dev", // 上記で定義した 'dev' サービス
+
+	// 3. コンテナ内の作業フォルダを指定 (docker-compose.ymlのvolumesと合わせる)
+	"workspaceFolder": "/workspaces/web-calculator-app",
+
+
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/python:1-3.12-bullseye",
+	// 4. 以前設定した 'features' (追加機能) は、ここで指定した 'service' ("dev") に対して適用される
 	"features": {
 		"ghcr.io/robbert229/devcontainer-features/postgresql-client:1": {
 			"version": "13"
 		},
 		"ghcr.io/devcontainers-extra/features/node-asdf:0": {
 			"version": "latest"
-		}
+		},
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
 	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.

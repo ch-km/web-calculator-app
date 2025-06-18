@@ -1,13 +1,18 @@
-from flask import jsonify
+from flask import jsonify, request
 from . import bp # 同じディレクトリの__init__.pyで定義したBlueprintインスタンスをインポート
 from app import db # __init__.pyで定義したdbインスタンスをインポート
 from sqlalchemy import text # 文字列を安全なSQLとして扱うためにインポート
+from flask_cors import CORS
+
+# CORSはアプリ全体で設定することが多いですが、ここではBlueprintに対して設定する例を示します
+# このBlueprintのエンドポイントに対してCORSを有効化
+CORS(bp)
 
 @bp.route('/ping', methods=['GET'])
 def ping_pong():
     return jsonify(message="pong!")
 
-# --- ここからが新しいコード ---
+
 @bp.route('/health', methods=['GET'])
 def health_check():
     """
@@ -32,3 +37,31 @@ def health_check():
     status_code = 200 if db_status == "ok" else 503
 
     return jsonify(response), status_code
+
+
+# --- PBI-08: 計算APIエンドポイント実装 ---
+@bp.route('/api/calculate', methods=['POST'])
+def calculate():
+    # リクエストボディがJSON形式であることを確認
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 400
+    
+    # JSONデータから 'expression' を取得
+    data = request.get_json()
+    expression = data.get('expression')
+
+    # 'expression' が存在するか確認
+    if not expression:
+        return jsonify({"error": "Missing 'expression' in request"}), 400
+    
+    try:
+        result = eval(expression)
+        return jsonify({"result": result}), 200
+    
+    except (SyntaxError, TypeError, NameError, ZeroDivisionError) as e:
+        # 計算エラーのハンドリング
+        return jsonify({"error":f"Calculation error: {str(e)}"}), 400
+    
+    except Exception as e:
+        # その他の予期せぬエラー
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500

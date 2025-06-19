@@ -1,6 +1,7 @@
 from flask import jsonify, request
 from . import bp # 同じディレクトリの__init__.pyで定義したBlueprintインスタンスをインポート
 from app import db # __init__.pyで定義したdbインスタンスをインポート
+from app.models import Calculation # Calculationモデルをインポート
 from sqlalchemy import text # 文字列を安全なSQLとして扱うためにインポート
 from flask_cors import CORS
 
@@ -39,7 +40,7 @@ def health_check():
     return jsonify(response), status_code
 
 
-# --- PBI-08: 計算APIエンドポイント実装 ---
+# --- PBI-08 & PBI-09: 計算APIエンドポイント実装 (履歴保存機能追加) ---
 @bp.route('/api/calculate', methods=['POST'])
 def calculate():
     # リクエストボディがJSON形式であることを確認
@@ -55,13 +56,34 @@ def calculate():
         return jsonify({"error": "Missing 'expression' in request"}), 400
     
     try:
-        result = eval(expression)
-        return jsonify({"result": result}), 200
+        calculated_result = eval(expression)
+
+        # --- PBI-09: 計算履歴保存ロジックの追加 ---
+        # Calculateonモデルのインスタンス作成
+        new_calculation = Calculation(
+            expression = expression,
+            result = calculated_result
+            # created_at と updated_at はモデル定義で server_default=func.now() や onupdate=func.now() で自動的に設定される
+        )
+
+        # データベースセッションにオブジェクトを追加
+        db.session.add(new_calculation)
+
+        # 変更をコミットしてデータベースに永続化する
+        db.session.commit()
+
+        # --- PBI-09 ロジックここまで ---
+
+        return jsonify({"result": calculated_result}), 200
     
     except (SyntaxError, TypeError, NameError, ZeroDivisionError) as e:
         # 計算エラーのハンドリング
+        # 計算エラー時もDBセッションをロールバック (念のため、これまでのセッション操作をクリア)
+        db.session.rollback()
         return jsonify({"error":f"Calculation error: {str(e)}"}), 400
     
     except Exception as e:
         # その他の予期せぬエラー
+        # 計算エラー時もDBセッションをロールバック
+        db.session.rollback()
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500

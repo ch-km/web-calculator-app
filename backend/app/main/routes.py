@@ -87,3 +87,28 @@ def calculate():
         # 計算エラー時もDBセッションをロールバック
         db.session.rollback()
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+
+
+# --- PBI-10: 計算履歴取得APIエンドポイント実装 ---
+@bp.route('/api/history', methods=['GET'])
+def get_histry():
+    try:
+        all_calculation = Calculation.query.all()
+
+        all_calculation.sort(key=lambda x: x.created_at, reverse=True)
+
+        history_data = []
+        for calc in all_calculation:
+            history_data.append({
+                "id": calc.id,
+                "expression": calc.expression,
+                "result": calc.result,
+                "created_at": calc.created_at.isoformat()
+            })
+        
+        return jsonify(history_data), 200
+    
+    except Exception as e:
+        # エラーハンドリング
+        print(f"Error fetching history: {e}") # サーバーログに出力
+        return jsonify({"error": f"Failed to retrieve history: {str(e)}"}), 500

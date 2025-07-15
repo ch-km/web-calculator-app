@@ -15,28 +15,43 @@
 
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	// 4. 以前設定した 'features' (追加機能) は、ここで指定した 'service' ("dev") に対して適用される
-	"features": {
-		"ghcr.io/robbert229/devcontainer-features/postgresql-client:1": {
-			"version": "13"
-		},
-		"ghcr.io/devcontainers-extra/features/node-asdf:0": {
-			"version": "latest"
-		},
-		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+    "features": {
+        "ghcr.io/robbert229/devcontainer-features/postgresql-client:1": {
+            "version": "13"
+        },
+        "ghcr.io/devcontainers-extra/features/node-asdf:0": {
+            // node-asdf featureはasdfツール自体をインストールします。
+            // Node.jsの特定のバージョンはpostCreateCommandでインストールします。
+        },
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
 	},
 
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [5001]
+    // forwardPorts: コンテナ内のポートをホストにフォワードする設定
+    // Flask (5001), Vite (5173), Create React App (3000) のデフォルトポートを追加
+    "forwardPorts": [5001, 5173, 3000],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "pip3 install --user -r requirements.txt",
+    // postCreateCommand: コンテナが作成された後に自動的に実行されるコマンド
+    // ここでasdfを使ってNode.jsの最新LTSバージョンをインストールし、npmとyarnを更新します。
+    // bash -c "..." は、asdfの環境変数が正しく読み込まれるようにするためです。
+    "postCreateCommand": "bash -c \"source $HOME/.asdf/asdf.sh && asdf plugin add nodejs || true && asdf install nodejs latest && asdf global nodejs latest && npm install -g npm@latest && npm install -g yarn\"",
 
 	// Configure tool-specific properties.
-	// "customizations": {},
-
+	// "customizations": {},    // customizations: ツール固有の設定（VS Code拡張機能の自動インストールなど）
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "dbaeumer.vscode-eslint", // ESLint (JavaScript/TypeScriptのコード品質チェック)
+                "esbenp.prettier-vscode", // Prettier (コードフォーマッター)
+                "ms-vscode.vscode-typescript-javascript-grammar", // JavaScript/TypeScriptの文法サポート
+                "ms-python.python", // Python開発用
+                "ms-azuretools.vscode-docker" // Docker操作用
+            ]
+        }
+    }
+	
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
 }

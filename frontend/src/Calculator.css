@@ -1,0 +1,100 @@
+/* 電卓全体のコンテナのスタイル */
+.calculator-sontainer {
+  width: 300px; /* 電卓の横幅 */
+  margin: 50px auto; /* 上下に50px、左右は自動（中央に配置） */
+  border: 1px solid #ccc; /* 薄い灰色の枠線 */
+  border-radius: 8px; /* 角を丸くする */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 影をつけて立体感を出す */
+  overflow: hidden; /* 角丸からはみ出る部分を隠す */
+}
+
+/* 計算結果表示画面のスタイル */
+.calculator-display {
+  background-color: #222; /* 暗い背景色 */
+  color: #fff; /* 白い文字色 */
+  font-size: 2.5em; /* 文字の大きさ */
+  padding: 20px; /* 内側の余白 */
+  text-align: right; /* 数字を右寄せにする */
+  border-top-left-radius: 8px; /* 上左右の角を丸くする */
+  border-top-right-radius: 8px;
+  overflow-x: auto; /* 数字が長くなったら横スクロールできるようにする */
+}
+
+/* ボタンを並べるグリッドのスタイル */
+.calculator-buttons {
+  display: grid; /* グリッドレイアウトを使用 */
+  grid-template-columns: repeat(4, 1fr); /* 4列に分割し、それぞれ同じ幅にする */
+  gap: 1px; /* ボタンとボタンの間に1pxの隙間を作る */
+  background-color: #eee; /* 隙間の色を薄い灰色にする（線のようになる） */
+  padding-top: 1px; /* 上部にも隙間を作る */
+}
+
+/* 各ボタンの基本的なスタイル */
+.button {
+  background-color: #f9f9f9; /* ボタンの背景色 */
+  border: none; /* 枠線をなくす */
+  padding: 20px; /* 内側の余白 */
+  font-size: 1.5em; /* 文字の大きさ */
+  cursor: pointer; /* マウスカーソルを指の形にする */
+  transition: background-color 0.2s; /* ホバー時の色の変化を滑らかにする */
+  border-radius: 0; /* ボタン自体の角丸はなし（グリッド内で統一感を出すため） */
+  display: flex; /* Flexboxを使ってボタンの中身を中央寄せにする */
+  justify-content: center; /* 横方向の中央寄せ */
+  align-items: center; /* 縦方向の中央寄せ */
+  min-height: 70px; /* ボタンの最低限の高さ */
+}
+
+/* マウスがボタンに乗ったときのスタイル */
+.button:hover {
+  background-color: #e0e0e0; /* 背景色を少し暗くする */
+}
+
+/* 演算子ボタンのスタイル */
+.button.operator {
+  background-color: #f09a36; /* オレンジ色の背景色 */
+  color: #fff; /* 白い文字色 */
+}
+
+/* 演算子ボタンにマウスが乗ったときのスタイル */
+.button.operator:hover {
+  background-color: #e08a26; /* 少し暗いオレンジ色 */
+}
+
+/* クリアボタンのスタイル */
+.button.clear {
+  background-color: #d9534f; /* 赤色の背景色 */
+  color: #fff; /* 白い文字色 */
+}
+
+/* クリアボタンにマウスが乗ったときのスタイル */
+.button.clear:hover {
+  background-color: #c9433f; /* 少し暗い赤色 */
+}
+
+/* イコールボタンのスタイル */
+.button.equals {
+  /* grid-column: span 2; */ /* この行は、もしイコールボタンを2列分に広げたい場合にコメントを外します。*/
+                             /* 今回は1列分で続けます。 */
+  background-color: #4CAF50; /* 緑色の背景色 */
+  color: #fff; /* 白い文字色 */
+}
+
+/* イコールボタンにマウスが乗ったときのスタイル */
+.button.equals:hover {
+  background-color: #45a049; /* 少し暗い緑色 */
+}
+
+/* モバイル対応（簡単な例） */
+@media (max-width: 600px) {
+  .calculator-container {
+    width: 95%; /* 画面幅に合わせて調整 */
+    margin: 20px auto; /* 上下20px、左右は自動（中央に配置） */
+  }
+  .button {
+    font-size: 1.2em; /* 文字の大きさを少し小さくする */
+    min-height: 60px; /* ボタンの高さを少し低くする */
+  }
+  .calculator-display {
+    font-size: 2em; /* 表示画面の文字の大きさを調整 */
+  }
+}

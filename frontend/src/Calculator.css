@@ -71,12 +71,24 @@
   background-color: #c9433f; /* 少し暗い赤色 */
 }
 
+/* イコールボタン専用の行のスタイル */
+.calculator-equals-row {
+  display: grid;
+  grid-template-columns: 1fr; /* 1列にする */
+  gap: 1px;
+  background-color: #eee;
+  padding-bottom: 1px;
+  border-bottom-left-radius: 8px; /* 下左右の角を丸くする */
+  border-bottom-right-radius: 8px;
+}
+
 /* イコールボタンのスタイル */
 .button.equals {
-  /* grid-column: span 2; */ /* この行は、もしイコールボタンを2列分に広げたい場合にコメントを外します。*/
-                             /* 今回は1列分で続けます。 */
+  grid-column: span 1; /* 1列分を占める */
   background-color: #4CAF50; /* 緑色の背景色 */
   color: #fff; /* 白い文字色 */
+  border-bottom-left-radius: 8px; /* 下左右の角を丸くする */
+  border-bottom-right-radius: 8px;
 }
 
 /* イコールボタンにマウスが乗ったときのスタイル */

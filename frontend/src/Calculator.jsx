@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import axios from 'axios';
 import './Calculator.css';
 
 
@@ -9,10 +9,7 @@ function Calculator() {
     const [displayValue, setDisplayValue] = useState('0');
     const [prevValue, setPrevValue] = useState(null);
     const [operator, setOperator] = useState(null);
-
-    // waitingForOperand: 演算子を押した後、次の数字の入力を待っている状態か
     const [waitingForOperand, setWaitingForOperand] = useState(false);
-  // --- ここまで ---
 
   // 数字ボタンがクリックされたときの処理
     const numClick = (num) => {
@@ -33,22 +30,46 @@ function Calculator() {
     };
     
     // 演算子ボタンがクリックされたときの処理
-    const operatorClick = (nextOperator) => {
+    // API通信は時間がかかる可能性があるので、asyncキーワードで非同期関数にする。
+    const operatorClick = async (nextOperator) => {
         const inputValue = parseFloat(displayValue); // 現在の表示値を数値に変換
 
-        if (prevValue === null) {
-            // 最初の演算子入力の場合
+        // 連続計算（例: 1 + 2 + ...）の場合、2つ目の演算子が押された時点で
+        // それまでの計算（1 + 2）をAPIに送って実行する。
+        if (operator && !waitingForOperand) {
+            const expression = `${prevValue}${operator}${inputValue}`;
+            console.log(`[演算子] 中間計算の式をAPIに送信: ${expression}`);
+
+            try {
+                // バックエンドに計算式をPOSTリクエストで送信
+                const response = await axios.post('/api/calculate', {expression});
+                const result = response.data.result;
+                console.log(`[演算子] APIからの中間結果: ${result}`);
+
+                // APIから返ってきた結果で表示と内部の値を更新
+                setDisplayValue(String(result))
+                setPrevValue(result)
+
+            } catch(error) {
+                console.error('[演算子] API呼び出しに失敗しました:', error);
+                setDisplayValue('Error');
+                setPrevValue(null);
+                setOperator(null);
+                setWaitingForOperand(false);
+                return; // エラーが発生したら処理を中断
+
+            }
+        } else {
+            // 最初の数字と演算子が入力された場合
             setPrevValue(inputValue);
-        } else if (operator) {
-            // 既に演算子が選択されている場合（連続演算）
-            const result = calculate(prevValue, inputValue, operator); // 計算を実行
-            setDisplayValue(String(result)); // 結果を表示
-            setPrevValue(result); // 結果を次のprevValueにする
         }
 
         setWaitingForOperand(true); // 次の数字入力を待つ状態にする
-        setOperator(nextOperator) // 新しい演算子をセット
+        setOperator(nextOperator); // 新しい演算子をセット
     };
+
+
+
 
     // クリアボタンがクリックされたときの処理
     const clearClick = () => {
@@ -59,40 +80,41 @@ function Calculator() {
     };
 
     // イコールボタンがクリックされたときの処理
-    const equalsClick = () => {
-        if (prevValue === null || operator === null) {
-            // 計算に必要な情報が揃っていない場合は何もしない
+    // こちらも同様に非同期関数にする。
+    const equalsClick = async () => {
+        // 計算に必要な情報が揃っていない場合は何もしない
+        if (prevValue === null || operator === null || waitingForOperand) {
             return;
         }
 
         const inputValue = parseFloat(displayValue);
-        const result = calculate(prevValue, inputValue, operator); // 計算を実行
-    
-        setDisplayValue(String(result)); // 結果を表示
-        setPrevValue(null); // 計算が終わったので前の値はリセット
-        setOperator(null); // 演算子もリセット
-        setWaitingForOperand(false); // 次の入力は新しい計算の開始
-    };
 
-    // 実際の計算を行うヘルパー関数
-    const calculate = (num1, num2, op) => {
-        switch (op) {
-            case '+':
-                return num1 + num2;
-            case '-':
-                return num1 - num2;
-            case '*':
-                return num1 * num2;
-            case '/':
-                // ゼロ除算のチェック
-                if (num2 === 0) {
-                return 'Error'; // エラー表示
-                }
-                return num1 / num2;
-            default:
-                return num2; // 演算子がない場合はnum2を返す（ありえないが念のため）
+        // APIに送るための計算式を文字列として組み立てる (例: "10+5")
+        const expression = `${prevValue}${operator}${inputValue}`;
+        console.log(`[イコール] 最終的な計算式をAPIに送信: ${expression}`);
+
+        try {
+            // バックエンドに計算式をPOSTリクエストで送信
+            const response = await axios.post('/api/calculate', {expression});
+            console.log(`[イコール] APIからの最終結果:`, response.data);
+
+            // APIから返ってきた結果で表示を更新
+            setDisplayValue(String(response.data.result));
+            
+            // 計算が完了したので、内部の状態をリセット
+            setPrevValue(null);
+            setOperator(null);
+            setWaitingForOperand(false);
+
+        } catch(error) {
+            console.error('[イコール] API呼び出しに失敗しました:', error);
+            setDisplayValue('Error');
+            setPrevValue(null);
+            setOperator(null);
+            setWaitingForOperand(false);
         }
     };
+
 
     return (
         <div className="calculator-container">

@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "db",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "database": "calculator_db",
+            "username": "user_dev",
+            "password": "password_dev",
+            "name": "電卓DB"
+        }
+    ]
+}

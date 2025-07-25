@@ -3,7 +3,7 @@ import axious from 'axios';
 import './History.css';
 
 
-function History () {
+function History({ needsUpdate }) {
     const [historyList, setHistoryList] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -22,7 +22,7 @@ function History () {
         };
 
         fetchHistory();
-    }, []) // 第2引数の空配列[]は「初回の一度だけ実行する」という意味
+    }, [needsUpdate]) // needsUpdateが変更されるたびに、このuseEffectが再実行される
 
 
     // ローディング中の表示

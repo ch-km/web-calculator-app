@@ -11,6 +11,8 @@ function Calculator() {
     const [prevValue, setPrevValue] = useState(null);
     const [operator, setOperator] = useState(null);
     const [waitingForOperand, setWaitingForOperand] = useState(false);
+    const [needsUpdate, setNeedsUpdate] = useState(false); //更新トリガー追加
+
 
   // 数字ボタンがクリックされたときの処理
     const numClick = (num) => {
@@ -79,7 +81,6 @@ function Calculator() {
     };
 
     // イコールボタンがクリックされたときの処理
-    // こちらも同様に非同期関数にする。
     const equalsClick = async () => {
         // 計算に必要な情報が揃っていない場合は何もしない
         if (prevValue === null || operator === null || waitingForOperand) {
@@ -104,6 +105,8 @@ function Calculator() {
             setPrevValue(null);
             setOperator(null);
             setWaitingForOperand(false);
+
+            setNeedsUpdate(prev => !prev); //計算成功時、トリガーを反転させる
 
         } catch(error) {
             console.error('[イコール] API呼び出しに失敗しました:', error);
@@ -148,7 +151,7 @@ function Calculator() {
                 <button className="button operator equals" onClick={equalsClick}>=</button>
                 </div>
             </div>
-            <History /> {/* 作成したHistoryコンポーネントを配置 */}
+            <History needsUpdate={needsUpdate}/> {/* 作成したHistoryコンポーネントを配置 */}
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './Calculator.css';
+import History from './components/History';
 
 
 function Calculator() {
@@ -10,6 +11,8 @@ function Calculator() {
     const [prevValue, setPrevValue] = useState(null);
     const [operator, setOperator] = useState(null);
     const [waitingForOperand, setWaitingForOperand] = useState(false);
+    const [needsUpdate, setNeedsUpdate] = useState(false); //更新トリガー追加
+
 
   // 数字ボタンがクリックされたときの処理
     const numClick = (num) => {
@@ -69,8 +72,6 @@ function Calculator() {
     };
 
 
-
-
     // クリアボタンがクリックされたときの処理
     const clearClick = () => {
         setDisplayValue('0');
@@ -80,7 +81,6 @@ function Calculator() {
     };
 
     // イコールボタンがクリックされたときの処理
-    // こちらも同様に非同期関数にする。
     const equalsClick = async () => {
         // 計算に必要な情報が揃っていない場合は何もしない
         if (prevValue === null || operator === null || waitingForOperand) {
@@ -106,6 +106,8 @@ function Calculator() {
             setOperator(null);
             setWaitingForOperand(false);
 
+            setNeedsUpdate(prev => !prev); //計算成功時、トリガーを反転させる
+
         } catch(error) {
             console.error('[イコール] API呼び出しに失敗しました:', error);
             setDisplayValue('Error');
@@ -117,35 +119,39 @@ function Calculator() {
 
 
     return (
-        <div className="calculator-container">
-            <div className="calculator-display">{displayValue}</div> {/* displayValueを動的に表示 */}
+        // calculator-containerを囲む親要素を追加
+        <div className='app-container'>
+            <div className="calculator-container">
+                <div className="calculator-display">{displayValue}</div> {/* displayValueを動的に表示 */}
 
-            <div className="calculator-buttons">
-                <button className="button" onClick={() => numClick('7')}>7</button>
-                <button className="button" onClick={() => numClick('8')}>8</button>
-                <button className="button" onClick={() => numClick('9')}>9</button>
-                <button className="button operator" onClick={() => operatorClick('/')}>/</button>
+                <div className="calculator-buttons">
+                    <button className="button" onClick={() => numClick('7')}>7</button>
+                    <button className="button" onClick={() => numClick('8')}>8</button>
+                    <button className="button" onClick={() => numClick('9')}>9</button>
+                    <button className="button operator" onClick={() => operatorClick('/')}>/</button>
 
-                <button className="button" onClick={() => numClick('4')}>4</button>
-                <button className="button" onClick={() => numClick('5')}>5</button>
-                <button className="button" onClick={() => numClick('6')}>6</button>
-                <button className="button operator" onClick={() => operatorClick('*')}>*</button>
+                    <button className="button" onClick={() => numClick('4')}>4</button>
+                    <button className="button" onClick={() => numClick('5')}>5</button>
+                    <button className="button" onClick={() => numClick('6')}>6</button>
+                    <button className="button operator" onClick={() => operatorClick('*')}>*</button>
 
-                <button className="button" onClick={() => numClick('1')}>1</button>
-                <button className="button" onClick={() => numClick('2')}>2</button>
-                <button className="button" onClick={() => numClick('3')}>3</button>
-                <button className="button operator" onClick={() => operatorClick('-')}>-</button>
+                    <button className="button" onClick={() => numClick('1')}>1</button>
+                    <button className="button" onClick={() => numClick('2')}>2</button>
+                    <button className="button" onClick={() => numClick('3')}>3</button>
+                    <button className="button operator" onClick={() => operatorClick('-')}>-</button>
 
-                <button className="button clear" onClick={clearClick}>C</button>
-                <button className="button" onClick={() => numClick('0')}>0</button>
-                <button className="button decimal" onClick={() => numClick('.')}>.</button>
-                <button className="button operator" onClick={() => operatorClick('+')}>+</button> {/* '+'ボタンを追加 */}
+                    <button className="button clear" onClick={clearClick}>C</button>
+                    <button className="button" onClick={() => numClick('0')}>0</button>
+                    <button className="button decimal" onClick={() => numClick('.')}>.</button>
+                    <button className="button operator" onClick={() => operatorClick('+')}>+</button> {/* '+'ボタンを追加 */}
+                </div>
+
+                {/* イコールボタン専用の行 */}
+                <div className="calculator-equals-row">
+                <button className="button operator equals" onClick={equalsClick}>=</button>
+                </div>
             </div>
-
-            {/* イコールボタン専用の行 */}
-            <div className="calculator-equals-row">
-            <button className="button operator equals" onClick={equalsClick}>=</button>
-            </div>
+            <History needsUpdate={needsUpdate}/> {/* 作成したHistoryコンポーネントを配置 */}
         </div>
     );
 }
